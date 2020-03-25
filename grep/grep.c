@@ -245,8 +245,7 @@ int advance(char *lp, char *ep) {
 	    return(0);
 	    
 	  case CDOL:
-	    if (lpstart != lp){continue;}
-	    if (*lp==0)
+	    if (*lp==0 || *lp == '\n')
 	      continue;
 	    return(0);
 
