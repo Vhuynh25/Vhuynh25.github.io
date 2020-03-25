@@ -45,8 +45,7 @@ int main(int argc, char **argv) {
   fcount = argc - 2; 
   compile(*argv);
   
-  while (--argc > fcount){
-    argv++;
+  while (*++argv > fcount){
     strcpy(p1, *argv);
     execute(*argv);
   }
