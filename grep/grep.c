@@ -354,7 +354,7 @@ int cclass(char *set, int c, int af) {
 }
 
 void printmatch(){
-  if (fcount >= 1)
+  if (fcount > 1)
     printf("%s: ", filename);
   printf("%s\n", linebuf);
 }
