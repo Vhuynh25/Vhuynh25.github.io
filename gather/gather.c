@@ -5,6 +5,7 @@ int no_subs = 0; // no checking sub_directories
 int main(int argc, const char* argv[]){
   if (argc < 3){
     fprintf(stderr, "Usage: ./program regularexpression directory/file\n");
+    return 0;
   }
   while (options_check(argv[1]) == 1){argv++;}
   
