@@ -1,8 +1,0 @@
-ed comes with g/STRING/ regular expression(regex) that prints lines that contain STRING
-   - /How does the same thing with first instance
-   - v/How does lines not containing "How"
-
-* regex == wildcards
-
-Test functions to see if they are essential for grep
-     - compile and test g/How/
