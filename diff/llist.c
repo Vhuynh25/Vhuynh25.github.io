@@ -1,6 +1,8 @@
 #include "llist.h"
 
-lnode* create_lnode(int num, char* line){
+// std list functions for line nodes
+
+lnode* create_lnode(int num, char* line){ // create new line node given line number and line
   lnode *newnode = (lnode*)malloc(sizeof(lnode));
   newnode->linenum = num;
   newnode->line = line;
