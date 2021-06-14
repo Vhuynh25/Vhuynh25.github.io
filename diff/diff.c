@@ -6,6 +6,7 @@
 #include <time.h>
 #define BUFMAX 1000
 #define TOKMAX 100000
+// the following global variables are all options
 int brief_mode = 0;
 int side_by_side = 0;
 int report_identical_files = 0;
@@ -23,10 +24,14 @@ int main(int argc, const char* argv[]){
     return 1;
   }
 
-  while(opt_check(argv[1]) != 0){argv++;}
+  while(opt_check(argv[1]) != 0){argv++;} // check for options and if end of options opt_check returns 0
   
+// this is a simplified version of diff
+// for purpose of this program, file 1 is being compared to file 2
+// aka all suggestions are for file 1 to match file 2
   FILE *f1;
   FILE *f2;
+
   dlist* file1;
   file1 = create_dlist();
   dlist* file2;
@@ -39,34 +44,36 @@ int main(int argc, const char* argv[]){
     fprintf(stderr, "Error: could not open file 1");
     return 1;
   } else {
-    file1 = linereading(f1,file1);
+// read all of file 1 into a list 
+// each node in the list is a class that holds a line from a file with a line count
+    file1 = linereading(f1,file1); 
     stat(argv[1],&fstat1);
     strftime(ftime1, 100,"%Y-%m-%d %H:%M:%S",localtime(&(fstat1.st_ctime)));
-    fpath1 = realpath(argv[1],NULL);
+    fpath1 = realpath(argv[1],NULL); // get path for file 2
   }
   if ((f2 = fopen(argv[2], "r")) == NULL) {
     fprintf(stderr, "Error: could not open file 2");
     return 1;
   } else {
+// file 2
     file2 = linereading(f2,file2);
     stat(argv[2],&fstat2);
     strftime(ftime2, 100 ,"%Y-%m-%d %H:%M:%S",localtime(&(fstat2.st_ctime)));
     fpath2 = realpath(argv[2],NULL);
-    
   }
   fclose(f1);
   fclose(f2);
 
   int b = -1;
 
-  if ((b = fwalk_brief(f1,f2)) == 1 && brief_mode == 1 ){
+  if ((b = fwalk_brief(f1,f2)) == 1 && brief_mode == 1 ){ // b == 1 means files are different
     printf("Files %s and %s differ\n", argv[0],argv[1]);
   }
   if (report_identical_files == 1 && b == 0){
     printf("Files %s and %s are identical\n", argv[0],argv[1]);
   }
-  else if (brief_mode == 0){
-    if (unified == 1){
+  else if (brief_mode == 0){ // if brief mode is off
+    if (unified == 1){ // print the file name
       printf("--- %s\n", fpath1);
       printf("+++ %s\n", fpath2);
     }
@@ -83,10 +90,11 @@ int main(int argc, const char* argv[]){
 void walk_line(dlist* file1,dlist* file2){
   lnode *left = file1->head;
   lnode *right = file2->head;
-  int hamming,count;
-  count = num;
+  int hamming,count; 
+  count = num; // count is for the context and unified options
   while (strlen(left->line) != 0 && strlen(right->line) != 0){
-    if (strcmp(left->line,right->line) == 0){
+    if (strcmp(left->line,right->line) == 0){ 
+	// if the lines are the same, print lines based on options
       if (side_by_side == 1 && suppress_common == 0 && left_columns == 0){
 	printf("  %s\n", left->line);
       }
@@ -99,8 +107,9 @@ void walk_line(dlist* file1,dlist* file2){
       right = right->next;
     } // do work depending on options
     else if ((hamming = hamming_dist(left->line,right->line)) < 6 &&
-	     hamming > 0){
-      if (side_by_side == 0)
+	     hamming > 0){ 
+	// if hamming distance between two line is < 6 but > 0 aka the lines are only a small number of letters off of each other
+      if (side_by_side == 0) 
 	{need_change(left, right);}
       else { printf("| %s\n", left->line); }
       left = left->next;
@@ -108,11 +117,12 @@ void walk_line(dlist* file1,dlist* file2){
       count = 1;
     }
     else if (fline(left,right->line) == NULL){
-      // if we don't find it in file 1, add
+      // if we don't find the line from file 2 in file 1, add
       right = need_add(left,right,file1);
       count = 1;
     }
-    else if (fline(right,left->line) == NULL){ //delete
+    else if (fline(right,left->line) == NULL){ 
+	// if we don't find the line from file 1 in file 2, delete
       left = need_delete(left,right,file2);
       count = 1;
     }
@@ -136,6 +146,7 @@ lnode* need_add(lnode* left, lnode* right,dlist* leftfile){
     right = right->next;
     // keep checking lines in file 2 if they are in file 1,
   }
+ // print the difference
   if (rightstart->linenum == right->linenum){
     printf("%da%d\n",left->linenum - 1, rightstart->linenum);
   }
@@ -154,7 +165,7 @@ lnode* need_delete(lnode* left, lnode* right, dlist* rightfile){
     left = left->next;
     // keep checking lines in file 1 if they are in file 2,
   }
- 
+ // print the difference
   if (leftstart->linenum == left->linenum){
     printf("%da%d\n",left->linenum, right->linenum - 1);}
   else if (side_by_side == 0){
@@ -166,14 +177,14 @@ lnode* need_delete(lnode* left, lnode* right, dlist* rightfile){
   return left->next;
 }
 
-void need_change(lnode* left, lnode* right){
+void need_change(lnode* left, lnode* right){ // print out the two lines that differ
   printf("%dc%d\n",left->linenum, right->linenum);
   print_left(left,left);
   printf("-----------------------\n");
   print_right(right,right);
 }
 
-int fwalk_brief(FILE* f1, FILE* f2){
+int fwalk_brief(FILE* f1, FILE* f2){ // if both files are exactly the same, then return 0 else return 1
   char c1,c2;
   while ((c1 = fgetc(f1)) == (c2 = fgetc(f2)) && c1 != EOF && c2 != EOF){}
   if (c1 == c2){return 0;}
@@ -235,6 +246,7 @@ int opt_check(const char* s){
 
 int hamming_dist(char *s1,const char *s2){
   // return '0' if the two strings are the same
+// return the number of letters that two strings differ by
   int dist;
   dist = 0;
   while (*s1 != '\0' && *s2 != '\0'){
