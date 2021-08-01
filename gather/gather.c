@@ -4,7 +4,7 @@ int no_subs = 0; // no checking sub_directories
 
 int main(int argc, const char* argv[]){
   if (argc < 3){
-    fprintf(stderr, "Usage: ./program regularexpression directory/file\n");
+    fprintf(stderr, "Usage: ./program -options regularexpression directory/file\n");
     return 0;
   }
   while (options_check(argv[1]) == 1){argv++;}
@@ -52,7 +52,7 @@ void gather(char* filename){
   if (fin == NULL){
     return;
   }
-;
+
   char outname[50] = "";
   strcat(outname,basename(filename));
   
